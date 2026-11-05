@@ -300,6 +300,7 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
+      max-width: 100%;
       margin-top: 25px;
       padding: 8px 11px;
       border: 1px solid var(--line);
@@ -309,6 +310,23 @@
     }
 
     .timezone svg { width: 13px; height: 13px; }
+
+    .timezone select {
+      max-width: min(230px, calc(100vw - 130px));
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--muted-strong);
+      cursor: pointer;
+      font: inherit;
+      text-overflow: ellipsis;
+    }
+
+    .timezone select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .timezone select option, .timezone select optgroup {
+      background: var(--panel);
+      color: var(--text);
+    }
 
     .clock-face {
       position: relative;
@@ -589,7 +607,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                 <circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path>
               </svg>
-              <span id="timezone-name">Local time</span>
+              <select id="timezone-select" aria-label="Choose a country or time zone"></select>
             </div>
           </div>
           <div class="clock-face" aria-hidden="true">
@@ -650,7 +668,101 @@
     const format12Button = document.getElementById("format-12h");
     const format24Button = document.getElementById("format-24h");
     const clockPeriod = document.getElementById("clock-period");
+    const timezoneSelect = document.getElementById("timezone-select");
     let clockFormat = localStorage.getItem("tempo-clock-format") === "12" ? "12" : "24";
+    const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    const timezoneGroups = [
+      {
+        label: "Americas",
+        zones: [
+          ["United States · New York", "America/New_York"],
+          ["United States · Chicago", "America/Chicago"],
+          ["United States · Denver", "America/Denver"],
+          ["United States · Los Angeles", "America/Los_Angeles"],
+          ["Canada · Toronto", "America/Toronto"],
+          ["Canada · Vancouver", "America/Vancouver"],
+          ["Mexico · Mexico City", "America/Mexico_City"],
+          ["Brazil · São Paulo", "America/Sao_Paulo"],
+          ["Argentina · Buenos Aires", "America/Argentina/Buenos_Aires"],
+          ["Chile · Santiago", "America/Santiago"],
+          ["Colombia · Bogotá", "America/Bogota"],
+          ["Peru · Lima", "America/Lima"]
+        ]
+      },
+      {
+        label: "Europe & Africa",
+        zones: [
+          ["United Kingdom · London", "Europe/London"],
+          ["France · Paris", "Europe/Paris"],
+          ["Germany · Berlin", "Europe/Berlin"],
+          ["Spain · Madrid", "Europe/Madrid"],
+          ["Italy · Rome", "Europe/Rome"],
+          ["Greece · Athens", "Europe/Athens"],
+          ["Turkey · Istanbul", "Europe/Istanbul"],
+          ["Ukraine · Kyiv", "Europe/Kyiv"],
+          ["Russia · Moscow", "Europe/Moscow"],
+          ["Egypt · Cairo", "Africa/Cairo"],
+          ["Nigeria · Lagos", "Africa/Lagos"],
+          ["South Africa · Johannesburg", "Africa/Johannesburg"],
+          ["Kenya · Nairobi", "Africa/Nairobi"],
+          ["Morocco · Casablanca", "Africa/Casablanca"]
+        ]
+      },
+      {
+        label: "Asia & Middle East",
+        zones: [
+          ["United Arab Emirates · Dubai", "Asia/Dubai"],
+          ["Saudi Arabia · Riyadh", "Asia/Riyadh"],
+          ["Pakistan · Karachi", "Asia/Karachi"],
+          ["India · Kolkata", "Asia/Kolkata"],
+          ["Nepal · Kathmandu", "Asia/Kathmandu"],
+          ["Bangladesh · Dhaka", "Asia/Dhaka"],
+          ["Sri Lanka · Colombo", "Asia/Colombo"],
+          ["Thailand · Bangkok", "Asia/Bangkok"],
+          ["Vietnam · Ho Chi Minh City", "Asia/Ho_Chi_Minh"],
+          ["Singapore · Singapore", "Asia/Singapore"],
+          ["Indonesia · Jakarta", "Asia/Jakarta"],
+          ["China · Shanghai", "Asia/Shanghai"],
+          ["Hong Kong · Hong Kong", "Asia/Hong_Kong"],
+          ["Philippines · Manila", "Asia/Manila"],
+          ["Japan · Tokyo", "Asia/Tokyo"],
+          ["South Korea · Seoul", "Asia/Seoul"],
+          ["Israel · Jerusalem", "Asia/Jerusalem"]
+        ]
+      },
+      {
+        label: "Oceania",
+        zones: [
+          ["Australia · Perth", "Australia/Perth"],
+          ["Australia · Sydney", "Australia/Sydney"],
+          ["New Zealand · Auckland", "Pacific/Auckland"],
+          ["Fiji · Suva", "Pacific/Fiji"]
+        ]
+      }
+    ];
+    const timezoneOptionExists = (timezone) =>
+      timezone === "local" || timezoneGroups.some((group) =>
+        group.zones.some(([, zone]) => zone === timezone)
+      );
+
+    const localOption = document.createElement("option");
+    localOption.value = "local";
+    localOption.textContent = `Local time · ${localTimezone.replaceAll("_", " ")}`;
+    timezoneSelect.append(localOption);
+    timezoneGroups.forEach((group) => {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = group.label;
+      group.zones.forEach(([label, zone]) => {
+        const option = document.createElement("option");
+        option.value = zone;
+        option.textContent = label;
+        optgroup.append(option);
+      });
+      timezoneSelect.append(optgroup);
+    });
+
+    const savedTimezone = localStorage.getItem("tempo-timezone");
+    timezoneSelect.value = timezoneOptionExists(savedTimezone) ? savedTimezone : "local";
 
     function applyTheme(theme) {
       const isLight = theme === "light";
@@ -694,6 +806,10 @@
 
     const pad = (value) => String(value).padStart(2, "0");
 
+    function getSelectedTimezone() {
+      return timezoneSelect.value === "local" ? localTimezone : timezoneSelect.value;
+    }
+
     function setClockFormat(format) {
       clockFormat = format;
       format12Button.setAttribute("aria-pressed", String(format === "12"));
@@ -704,24 +820,35 @@
 
     function updateClock() {
       const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-      const displayHours = clockFormat === "12" ? (hours % 12 || 12) : hours;
+      const selectedZone = getSelectedTimezone();
+      const timeParts = new Intl.DateTimeFormat(undefined, {
+        timeZone: selectedZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: clockFormat === "12" ? "h12" : "h23"
+      }).formatToParts(now);
+      const part = (type) => timeParts.find((item) => item.type === type)?.value;
+      const displayHours = Number(part("hour"));
+      const minutes = Number(part("minute"));
+      const seconds = Number(part("second"));
       document.getElementById("clock-hours").textContent = pad(displayHours);
       document.getElementById("clock-minutes").textContent = pad(minutes);
       document.getElementById("clock-seconds").textContent = pad(seconds);
       clockPeriod.hidden = clockFormat !== "12";
-      clockPeriod.textContent = hours < 12 ? "AM" : "PM";
+      clockPeriod.textContent = part("dayPeriod") || "";
       document.querySelector(".time").setAttribute(
         "aria-label",
         `${displayHours}:${pad(minutes)}:${pad(seconds)}${clockFormat === "12" ? ` ${clockPeriod.textContent}` : ""}`
       );
       document.getElementById("clock-date").textContent = new Intl.DateTimeFormat(undefined, {
-        weekday: "long", month: "long", day: "numeric", year: "numeric"
+        weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: selectedZone
       }).format(now);
-      document.getElementById("timezone-name").textContent =
-        Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+      const hours = Number(new Intl.DateTimeFormat("en-US", {
+        timeZone: selectedZone,
+        hour: "numeric",
+        hourCycle: "h23"
+      }).format(now));
       document.getElementById("hour-hand").style.transform =
         `rotate(${(hours % 12) * 30 + minutes * 0.5}deg)`;
       document.getElementById("minute-hand").style.transform =
@@ -731,6 +858,10 @@
 
     format12Button.addEventListener("click", () => setClockFormat("12"));
     format24Button.addEventListener("click", () => setClockFormat("24"));
+    timezoneSelect.addEventListener("change", () => {
+      localStorage.setItem("tempo-timezone", timezoneSelect.value);
+      updateClock();
+    });
     format12Button.setAttribute("aria-pressed", String(clockFormat === "12"));
     format24Button.setAttribute("aria-pressed", String(clockFormat === "24"));
 
