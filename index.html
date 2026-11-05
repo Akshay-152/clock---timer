@@ -14,9 +14,49 @@
       --line: #2b2d31;
       --text: #f3f1ec;
       --muted: #8e9095;
+      --muted-strong: #b8b9b5;
+      --date-text: #b7b7b4;
       --accent: #d3f36b;
       --accent-ink: #1a2110;
+      --card-start: rgba(28, 29, 32, .98);
+      --card-end: rgba(22, 23, 26, .98);
+      --tab-bg: rgba(24, 25, 28, .8);
+      --tab-selected: #2a2c30;
+      --face-border: #383a3c;
+      --face-center: #202226;
+      --tick-color: #54565a;
+      --tick-major: #a4a69e;
+      --minute-hand: #c3c4bd;
+      --control-border-hover: #62645e;
+      --control-hover: rgba(255,255,255,.035);
+      --footer: #6f7175;
       --radius: 22px;
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f3ee;
+      --panel: #ffffff;
+      --panel-soft: #f1f0eb;
+      --line: #dfded7;
+      --text: #22231f;
+      --muted: #777972;
+      --muted-strong: #565851;
+      --date-text: #62645d;
+      --accent: #b5d94d;
+      --accent-ink: #1a2110;
+      --card-start: rgba(255, 255, 252, .98);
+      --card-end: rgba(248, 247, 241, .98);
+      --tab-bg: rgba(255, 255, 255, .76);
+      --tab-selected: #e8e8df;
+      --face-border: #cecec5;
+      --face-center: #f4f3ee;
+      --tick-color: #b1b2a9;
+      --tick-major: #696b62;
+      --minute-hand: #666860;
+      --control-border-hover: #a4a59b;
+      --control-hover: rgba(0,0,0,.045);
+      --footer: #7d7e76;
     }
 
     * { box-sizing: border-box; }
@@ -48,6 +88,38 @@
       justify-content: space-between;
       margin-bottom: 48px;
     }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .icon-button {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--tab-bg);
+      color: var(--muted-strong);
+      cursor: pointer;
+      transition: border-color .18s ease, color .18s ease, background .18s ease;
+    }
+
+    .icon-button:hover {
+      border-color: var(--control-border-hover);
+      background: var(--control-hover);
+      color: var(--text);
+    }
+
+    .icon-button svg { width: 17px; height: 17px; }
+    .moon-icon, .fullscreen-exit-icon { display: none; }
+    :root[data-theme="light"] .sun-icon,
+    :root.is-fullscreen .fullscreen-enter-icon { display: none; }
+    :root[data-theme="light"] .moon-icon,
+    :root.is-fullscreen .fullscreen-exit-icon { display: block; }
 
     .brand {
       display: inline-flex;
@@ -117,7 +189,7 @@
       padding: 5px;
       border: 1px solid var(--line);
       border-radius: 13px;
-      background: rgba(24, 25, 28, .8);
+      background: var(--tab-bg);
     }
 
     .tab {
@@ -134,14 +206,14 @@
     }
 
     .tab:hover { color: var(--text); }
-    .tab[aria-selected="true"] { background: #2a2c30; color: var(--text); }
+    .tab[aria-selected="true"] { background: var(--tab-selected); color: var(--text); }
 
     .card {
       min-height: 430px;
       padding: clamp(22px, 5vw, 44px);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: linear-gradient(145deg, rgba(28, 29, 32, .98), rgba(22, 23, 26, .98));
+      background: linear-gradient(145deg, var(--card-start), var(--card-end));
       box-shadow: 0 24px 70px rgba(0, 0, 0, .18);
     }
 
@@ -158,6 +230,42 @@
     }
 
     .clock-copy { min-width: 0; }
+    .clock-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 5px;
+    }
+
+    .clock-heading .eyebrow { margin: 0; }
+
+    .format-toggle {
+      display: inline-flex;
+      flex: 0 0 auto;
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--tab-bg);
+    }
+
+    .format-option {
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .format-option[aria-pressed="true"] {
+      background: var(--tab-selected);
+      color: var(--text);
+    }
+
     .time {
       margin: 4px 0 6px;
       font-variant-numeric: tabular-nums;
@@ -165,6 +273,15 @@
       font-weight: 450;
       letter-spacing: -.075em;
       line-height: 1;
+    }
+
+    .time .period {
+      margin-left: 8px;
+      color: var(--muted);
+      font-size: .24em;
+      font-weight: 650;
+      letter-spacing: .04em;
+      vertical-align: .55em;
     }
 
     .time .seconds {
@@ -175,7 +292,7 @@
 
     .date-line {
       margin: 15px 0 0;
-      color: #b7b7b4;
+      color: var(--date-text);
       font-size: 15px;
     }
 
@@ -200,10 +317,10 @@
       aspect-ratio: 1;
       place-items: center;
       justify-self: center;
-      border: 1px solid #383a3c;
+      border: 1px solid var(--face-border);
       border-radius: 50%;
       background:
-        radial-gradient(circle, #202226 0 2px, transparent 3px),
+        radial-gradient(circle, var(--face-center) 0 2px, transparent 3px),
         radial-gradient(circle, rgba(255,255,255,.025), transparent 68%);
       box-shadow: inset 0 0 35px rgba(0, 0, 0, .2), 0 0 0 9px rgba(255,255,255,.012);
     }
@@ -214,10 +331,10 @@
       height: 7px;
       top: 10px;
       left: calc(50% - .5px);
-      background: #54565a;
+      background: var(--tick-color);
       transform-origin: 50% 109px;
     }
-    .tick.major { height: 11px; width: 2px; background: #a4a69e; }
+    .tick.major { height: 11px; width: 2px; background: var(--tick-major); }
 
     .hand {
       position: absolute;
@@ -228,7 +345,7 @@
       transform-origin: 50% 100%;
     }
     .hand.hour { width: 4px; height: 58px; background: var(--text); }
-    .hand.minute { width: 3px; height: 78px; background: #c3c4bd; }
+    .hand.minute { width: 3px; height: 78px; background: var(--minute-hand); }
     .hand.second { width: 1px; height: 89px; background: var(--accent); }
     .hand-cap {
       position: absolute;
@@ -237,7 +354,7 @@
       height: 9px;
       border: 2px solid var(--accent);
       border-radius: 50%;
-      background: #202226;
+      background: var(--face-center);
     }
 
     .timer-content, .stopwatch-content {
@@ -304,12 +421,12 @@
       border: 1px solid var(--line);
       border-radius: 9px;
       background: transparent;
-      color: #b8b9b5;
+      color: var(--muted-strong);
       cursor: pointer;
       font-size: 12px;
       transition: border-color .18s ease, background .18s ease;
     }
-    .preset:hover, .secondary-button:hover { border-color: #62645e; background: rgba(255,255,255,.035); }
+    .preset:hover, .secondary-button:hover { border-color: var(--control-border-hover); background: var(--control-hover); }
 
     .actions { display: flex; justify-content: center; gap: 10px; }
     .primary-button {
@@ -349,7 +466,7 @@
       justify-content: space-between;
       gap: 12px;
       margin-top: 20px;
-      color: #6f7175;
+      color: var(--footer);
       font-size: 11px;
     }
 
@@ -367,6 +484,41 @@
       .timezone { margin-top: 15px; }
       .timer-content, .stopwatch-content { min-height: 350px; }
       .tab { min-width: 0; padding: 10px 13px; }
+      .header-actions { gap: 9px; }
+      .local-label { font-size: 10px; }
+    }
+
+    @media (max-width: 390px) {
+      .local-label { display: none; }
+    }
+
+    :root.is-fullscreen .app {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    :root.is-fullscreen header {
+      position: absolute;
+      top: 0;
+      right: max(20px, calc((100vw - 960px) / 2));
+      left: max(20px, calc((100vw - 960px) / 2));
+    }
+
+    .control-status {
+      position: fixed;
+      z-index: 3;
+      right: 16px;
+      bottom: 16px;
+      max-width: calc(100vw - 32px);
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      color: var(--text);
+      font-size: 13px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.16);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -386,12 +538,31 @@
         </span>
         <span>tempo</span>
       </div>
-      <div class="local-label"><span class="live-dot"></span><span>YOUR LOCAL TIME</span></div>
+      <div class="header-actions">
+        <div class="local-label"><span class="live-dot"></span><span>YOUR LOCAL TIME</span></div>
+        <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.5 8.5 0 1 0 20.2 15.4Z"></path>
+          </svg>
+        </button>
+        <button class="icon-button" id="fullscreen-toggle" type="button" aria-label="Enter fullscreen" title="Enter fullscreen">
+          <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3"></path>
+          </svg>
+          <svg class="fullscreen-exit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M8 3v3a2 2 0 0 1-2 2H3m13-5v3a2 2 0 0 0 2 2h3M3 16h3a2 2 0 0 1 2 2v3m13-5h-3a2 2 0 0 0-2 2v3"></path>
+          </svg>
+        </button>
+        <span class="control-status" id="control-status" role="status" hidden></span>
+      </div>
     </header>
 
     <p class="eyebrow">A little more in sync</p>
     <h1>Time, well spent.</h1>
-    <p class="subheading">A simple space for your time.</p>
+    
 
     <nav class="tabs" role="tablist" aria-label="Time tools">
       <button class="tab" id="clock-tab" type="button" role="tab" aria-selected="true" aria-controls="clock-view">Clock</button>
@@ -403,9 +574,15 @@
       <section class="view active" id="clock-view" role="tabpanel" aria-labelledby="clock-tab">
         <div class="clock-layout">
           <div class="clock-copy">
-            <p class="eyebrow">Right now</p>
+            <div class="clock-heading">
+              <p class="eyebrow">Right now</p>
+              <div class="format-toggle" role="group" aria-label="Clock format">
+                <button class="format-option" id="format-12h" type="button" aria-pressed="false">12 h</button>
+                <button class="format-option" id="format-24h" type="button" aria-pressed="true">24 h</button>
+              </div>
+            </div>
             <p class="time" aria-label="Current time">
-              <span id="clock-hours">00</span><span>:</span><span id="clock-minutes">00</span><span class="seconds">:<span id="clock-seconds">00</span></span>
+              <span id="clock-hours">00</span><span>:</span><span id="clock-minutes">00</span><span class="seconds">:<span id="clock-seconds">00</span></span><span class="period" id="clock-period" hidden></span>
             </p>
             <p class="date-line" id="clock-date"></p>
             <div class="timezone">
@@ -461,20 +638,85 @@
       </section>
     </section>
 
-    <footer><span>Keep your own pace.</span><span>Made for the moment.</span></footer>
+    <footer><span>MADE BY AKSHAY PK</span></footer>
   </main>
 
   <script>
+    const root = document.documentElement;
+    const themeToggle = document.getElementById("theme-toggle");
+    const fullscreenToggle = document.getElementById("fullscreen-toggle");
+    const controlStatus = document.getElementById("control-status");
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    const format12Button = document.getElementById("format-12h");
+    const format24Button = document.getElementById("format-24h");
+    const clockPeriod = document.getElementById("clock-period");
+    let clockFormat = localStorage.getItem("tempo-clock-format") === "12" ? "12" : "24";
+
+    function applyTheme(theme) {
+      const isLight = theme === "light";
+      root.dataset.theme = isLight ? "light" : "dark";
+      themeToggle.setAttribute("aria-label", `Switch to ${isLight ? "dark" : "light"} mode`);
+      themeToggle.title = `Switch to ${isLight ? "dark" : "light"} mode`;
+      themeColor.content = isLight ? "#f4f3ee" : "#101113";
+    }
+
+    applyTheme(localStorage.getItem("tempo-theme") === "light" ? "light" : "dark");
+    themeToggle.addEventListener("click", () => {
+      const theme = root.dataset.theme === "light" ? "dark" : "light";
+      applyTheme(theme);
+      localStorage.setItem("tempo-theme", theme);
+    });
+
+    function updateFullscreenState() {
+      const isFullscreen = Boolean(document.fullscreenElement);
+      root.classList.toggle("is-fullscreen", isFullscreen);
+      fullscreenToggle.setAttribute("aria-label", isFullscreen ? "Exit fullscreen" : "Enter fullscreen");
+      fullscreenToggle.title = isFullscreen ? "Exit fullscreen" : "Enter fullscreen";
+      controlStatus.hidden = true;
+      controlStatus.textContent = "";
+    }
+
+    document.addEventListener("fullscreenchange", updateFullscreenState);
+    fullscreenToggle.addEventListener("click", async () => {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          throw new Error("Fullscreen is not supported by this browser.");
+        }
+      } catch (error) {
+        controlStatus.textContent = `Could not change fullscreen: ${error.message}`;
+        controlStatus.hidden = false;
+      }
+    });
+
     const pad = (value) => String(value).padStart(2, "0");
+
+    function setClockFormat(format) {
+      clockFormat = format;
+      format12Button.setAttribute("aria-pressed", String(format === "12"));
+      format24Button.setAttribute("aria-pressed", String(format === "24"));
+      localStorage.setItem("tempo-clock-format", format);
+      updateClock();
+    }
 
     function updateClock() {
       const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const seconds = now.getSeconds();
-      document.getElementById("clock-hours").textContent = pad(hours);
+      const displayHours = clockFormat === "12" ? (hours % 12 || 12) : hours;
+      document.getElementById("clock-hours").textContent = pad(displayHours);
       document.getElementById("clock-minutes").textContent = pad(minutes);
       document.getElementById("clock-seconds").textContent = pad(seconds);
+      clockPeriod.hidden = clockFormat !== "12";
+      clockPeriod.textContent = hours < 12 ? "AM" : "PM";
+      document.querySelector(".time").setAttribute(
+        "aria-label",
+        `${displayHours}:${pad(minutes)}:${pad(seconds)}${clockFormat === "12" ? ` ${clockPeriod.textContent}` : ""}`
+      );
       document.getElementById("clock-date").textContent = new Intl.DateTimeFormat(undefined, {
         weekday: "long", month: "long", day: "numeric", year: "numeric"
       }).format(now);
@@ -486,6 +728,11 @@
         `rotate(${minutes * 6 + seconds * 0.1}deg)`;
       document.getElementById("second-hand").style.transform = `rotate(${seconds * 6}deg)`;
     }
+
+    format12Button.addEventListener("click", () => setClockFormat("12"));
+    format24Button.addEventListener("click", () => setClockFormat("24"));
+    format12Button.setAttribute("aria-pressed", String(clockFormat === "12"));
+    format24Button.setAttribute("aria-pressed", String(clockFormat === "24"));
 
     const ticks = document.getElementById("clock-ticks");
     for (let i = 0; i < 60; i++) {
